@@ -4,4 +4,4 @@
 
 <div align="center">6833</div>
 <br>
-<div align="center">This code is written for support with Spark Max controllers and Spark NEO motors.</div>
+<div align="center">This code is written for support with Spark Max controllers and NEO V1.1 motors.</div>
