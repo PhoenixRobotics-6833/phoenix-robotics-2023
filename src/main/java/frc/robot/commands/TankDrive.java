@@ -4,15 +4,18 @@
 
 package frc.robot.commands;
 
+import java.io.Console;
 import java.lang.module.ModuleDescriptor.Requires;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Drivetrain;
-
+import edu.wpi.first.wpilibj.XboxController;
 public class TankDrive extends CommandBase {
+  private XboxController inputDevice = new XboxController(Constants.USB_PORT_ID);
   /** Creates a new TankDrive. */
   public TankDrive() {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -26,13 +29,15 @@ public class TankDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double leftStickY = Robot.m_robotContainer.getRawInput(Constants.LEFT_STICK_Y);
-    double rightStickY = Robot.m_robotContainer.getRawInput(Constants.RIGHT_STICK_Y);
+    double throtle = inputDevice.getRawAxis(Constants.RIGHT_TRIGGER) - inputDevice.getRawAxis(Constants.LEFT_TRIGGER);
+    double stickX = inputDevice.getRawAxis(Constants.LEFT_STICK_X);
+    System.out.println("working");
+    Robot.chassis.setLeftMotars(throtle + stickX);
+    Robot.chassis.setRightMotars(throtle - stickX);
 
-    Robot.chassis.setLeftMotars(leftStickY * Constants.STICK_SENS);
-    Robot.chassis.setRightMotars(rightStickY * Constants.STICK_SENS);
   }
 
+  
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {

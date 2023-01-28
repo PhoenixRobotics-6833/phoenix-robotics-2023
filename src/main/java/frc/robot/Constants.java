@@ -14,10 +14,11 @@ package frc.robot;
  */
 public final class Constants {
     public static final int USB_PORT_ID = 0;
-    public static final int MOTAR_LEFT_FRONT_ID = 1;
-    public static final int MOTAR_LEFT_BACK_ID = 2;
-    public static final int MOTAR_RIGHT_FRONT_ID = 3;
-    public static final int LEFT_STICK_Y = 1;
-    public static final int RIGHT_STICK_Y = 5;
-    public static final double STICK_SENS = 0.5;
+    public static final int MOTOR_LEFT_FRONT_ID = 1;
+    public static final int MOTOR_LEFT_BACK_ID = 2;
+    public static final int MOTOR_RIGHT_FRONT_ID = 3;
+    public static final int MOTOR_RIGHT_BACK_ID = 4;
+    public static final int LEFT_STICK_X = 0;
+    public static final int RIGHT_TRIGGER = 3;
+    public static final int LEFT_TRIGGER = 2;
 }

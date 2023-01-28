@@ -6,7 +6,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -25,10 +24,6 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  public double getRawInput(int axis) {
-    return inputDevice.getRawAxis(axis);
-  }
-
   
   private void configureButtonBindings() {}
 
@@ -40,5 +35,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     return null;
+  }
+
+  public double getRawAxis(int axis) {
+    return inputDevice.getRawAxis(axis);
   }
 }
