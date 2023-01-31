@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-import java.io.Console;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -104,8 +103,13 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2)) ;
     double stickX = inputDevice.getRawAxis(0) * TurnMod; 
-    setLeftMotars(throtle + stickX);
-    setRightMotars(throtle - stickX);
+  
+    double leftDrive = throtle + stickX;
+    double rightDrive = throtle - stickX;
+
+    setLeftMotars(leftDrive);
+    setRightMotars(rightDrive);
+
     double averageSpeed = (throtle + stickX + throtle - stickX)/2;
     System.out.println(averageSpeed);
   }
