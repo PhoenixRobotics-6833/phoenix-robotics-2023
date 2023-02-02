@@ -6,6 +6,8 @@ package frc.robot;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxRelativeEncoder;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,7 +23,7 @@ public class Robot extends TimedRobot {
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private final SendableChooser<String> m_chooser = new SendableChooser<>(); 
 
   CANSparkMax motarLF = new CANSparkMax (1, MotorType.kBrushless);
   CANSparkMax motarLB = new CANSparkMax (2, MotorType.kBrushless);
@@ -102,13 +104,13 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2)) ;
-    double stickX = inputDevice.getRawAxis(0) * TurnMod; 
+    double stickX = inputDevice.getRawAxis(0); 
   
     double leftDrive = throtle + stickX;
     double rightDrive = throtle - stickX;
 
-    setLeftMotars(leftDrive);
-    setRightMotars(rightDrive);
+    setLeftMotars(leftDrive * 0.1);
+    setRightMotars(rightDrive * 0.1);
 
     double averageSpeed = (throtle + stickX + throtle - stickX)/2;
     System.out.println(averageSpeed);
