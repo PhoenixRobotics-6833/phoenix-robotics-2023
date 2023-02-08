@@ -18,3 +18,8 @@
     40 stop
     99 inches
 }
+5 {
+    0.5 speed
+    30 stop
+    75 inches
+}
