@@ -3,15 +3,15 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxRelativeEncoder;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.XboxController;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -20,27 +20,30 @@ import edu.wpi.first.wpilibj.XboxController;
  * project.
  */
 public class Robot extends TimedRobot {
+  private static double SPEED_MOD = 0.15;
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>(); 
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  CANSparkMax motarLF = new CANSparkMax (1, MotorType.kBrushless);
-  CANSparkMax motarLB = new CANSparkMax (2, MotorType.kBrushless);
-  CANSparkMax motarRF = new CANSparkMax (3, MotorType.kBrushless);
-  CANSparkMax motarRB = new CANSparkMax (4, MotorType.kBrushless);
+  CANSparkMax motorLF = new CANSparkMax (1, MotorType.kBrushless);
+  CANSparkMax motorLB = new CANSparkMax (2, MotorType.kBrushless);
+  CANSparkMax motorRF = new CANSparkMax (3, MotorType.kBrushless);
+  CANSparkMax motorRB = new CANSparkMax (4, MotorType.kBrushless);
+
+  RelativeEncoder encoderLF; 
+  RelativeEncoder encoderRF; 
+
 
   private XboxController inputDevice = new XboxController(0);
 
-  static double maxSpeed = 0.05;
-  static double TurnMod = 0.1;
   public void setRightMotars(double speed) {
-    motarRF.set(-speed);
-    motarRB.set(-speed);
+    motorRF.set(-speed);
+    motorRB.set(-speed);
   }
   public void setLeftMotars(double speed) {
-    motarLF.set(speed);
-    motarLB.set(speed);
+    motorLF.set(speed);
+    motorLB.set(speed);
   }
 
 
@@ -53,6 +56,7 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    
   }
 
   /**
@@ -80,19 +84,37 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+    encoderLF = motorLF.getEncoder();
+    encoderRF = motorRF.getEncoder();
+    encoderLF.setPosition(0.0);
+    encoderRF.setPosition(0.0);
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
+    double lDistance = encoderLF.getPosition();
+    double rDistance = -encoderRF.getPosition();
+
+    double haltDistance = 30.0;
+    double testSpeed = 0.5;
     switch (m_autoSelected) {
       case kCustomAuto:
-        // Put custom auto code here
-        break;
+
       case kDefaultAuto:
       default:
-        // Put default auto code here
-        break;
+      
+        if (rDistance < haltDistance) {
+          setLeftMotars(testSpeed);
+          setRightMotars(testSpeed);
+        } else {
+          setRightMotars(0.0);
+          setLeftMotars(0.0);
+          System.out.println("Task halted");
+        }
+        
+        //System.out.println("left" + lDistance);
+        //System.out.println("right" + rDistance);
     }
   }
 
@@ -104,14 +126,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2)) ;
-    double stickX = inputDevice.getRawAxis(0); 
-  
-    double leftDrive = throtle + stickX;
-    double rightDrive = throtle - stickX;
-
-    setLeftMotars(leftDrive * 0.1);
-    setRightMotars(rightDrive * 0.1);
-
+    double stickX = inputDevice.getRawAxis(0);
+    setLeftMotars((throtle + stickX) * SPEED_MOD);
+    setRightMotars((throtle - stickX) * SPEED_MOD);
     double averageSpeed = (throtle + stickX + throtle - stickX)/2;
     System.out.println(averageSpeed);
   }

@@ -1,0 +1,20 @@
+1 {
+    0.1 speed
+    50 stop
+    110 inches
+}
+2 {
+    0.5 speed
+    50 stop
+    121 inches
+}
+3 {
+    1 speed
+    50 stop
+    133 inches
+}
+4 {
+    0.5 speed
+    40 stop
+    99 inches
+}
