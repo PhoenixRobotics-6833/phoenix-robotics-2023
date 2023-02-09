@@ -1,3 +1,6 @@
+
+wheel ratio: 8.45:1
+
 1 {
     0.1 speed
     50 stop
@@ -8,6 +11,7 @@
     50 stop
     121 inches
 }
+
 3 {
     1 speed
     50 stop
@@ -23,3 +27,4 @@
     30 stop
     75 inches
 }
+2.23071667y

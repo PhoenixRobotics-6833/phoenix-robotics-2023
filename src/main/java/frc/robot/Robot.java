@@ -26,6 +26,8 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  private XboxController inputDevice = new XboxController(0);
+
   CANSparkMax motorLF = new CANSparkMax (1, MotorType.kBrushless);
   CANSparkMax motorLB = new CANSparkMax (2, MotorType.kBrushless);
   CANSparkMax motorRF = new CANSparkMax (3, MotorType.kBrushless);
@@ -34,8 +36,7 @@ public class Robot extends TimedRobot {
   RelativeEncoder encoderLF; 
   RelativeEncoder encoderRF; 
 
-
-  private XboxController inputDevice = new XboxController(0);
+  static double MOTOR_RATIO = 2.23071667;
 
   public void setRightMotars(double speed) {
     motorRF.set(-speed);
@@ -44,6 +45,10 @@ public class Robot extends TimedRobot {
   public void setLeftMotars(double speed) {
     motorLF.set(speed);
     motorLB.set(speed);
+  }
+
+  public void calculateRotations(double inches) {
+    return(inches/MOTOR_RATIO);
   }
 
 
@@ -95,8 +100,9 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     double lDistance = encoderLF.getPosition();
     double rDistance = -encoderRF.getPosition();
+    double aDistance = (lDistance + rDistance)/2;
 
-    double haltDistance = 30.0;
+    double targetDistance = 100.0;
     double testSpeed = 0.5;
     switch (m_autoSelected) {
       case kCustomAuto:
@@ -104,7 +110,7 @@ public class Robot extends TimedRobot {
       case kDefaultAuto:
       default:
       
-        if (rDistance < haltDistance) {
+        if (aDistance < calculateRotations(targetDistance)) {
           setLeftMotars(testSpeed);
           setRightMotars(testSpeed);
         } else {
