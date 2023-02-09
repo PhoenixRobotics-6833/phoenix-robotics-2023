@@ -27,4 +27,13 @@ wheel ratio: 8.45:1
     30 stop
     75 inches
 }
-2.23071667y
+
+distance calculation :
+i is inches
+s is speed
+y is motor rotations
+y = 0.44828642i + 8.96572848s^2
+
+motor rotations
+distance
+speed
