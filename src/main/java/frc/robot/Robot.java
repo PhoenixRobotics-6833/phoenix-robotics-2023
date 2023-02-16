@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static double SPEED_MOD = 0.15;
+  private static double SPEED_MOD = 0.5;
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
     motorLB.set(speed);
   }
 
-  public void calculateRotations(double inches) {
+  public double calculateRotations(double inches) {
     return(inches/MOTOR_RATIO);
   }
 
@@ -102,7 +102,8 @@ public class Robot extends TimedRobot {
     double aDistance = (lDistance + rDistance)/2;
 
     double targetDistance = 100.0;
-    double testSpeed = 0.5;
+    double testSpeed = 0.175;
+    
     switch (m_autoSelected) {
       case kCustomAuto:
 
