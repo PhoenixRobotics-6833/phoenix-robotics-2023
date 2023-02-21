@@ -6,8 +6,8 @@ package frc.robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.Encoder;
+import com.ctre.phoenix.motorcontrol.*;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -32,12 +32,25 @@ public class Robot extends TimedRobot {
   CANSparkMax motorLB = new CANSparkMax (2, MotorType.kBrushless);
   CANSparkMax motorRF = new CANSparkMax (3, MotorType.kBrushless);
   CANSparkMax motorRB = new CANSparkMax (4, MotorType.kBrushless);
+  TalonSRX motorM = new TalonSRX(5);
 
   RelativeEncoder encoderLF; 
   RelativeEncoder encoderRF; 
 
   static double MOTOR_RATIO = 2.23071667;
+// AUTO VARS
 
+  double taskIndex;
+  double aDistance;
+  double lDistance;
+  double rDistance;
+
+// GLOBAL FUNCTIONS
+
+  public void armGrab() {
+    // MANIPULATOR CODE HERE
+   return;
+  }
   public void setRightMotars(double speed) {
     motorRF.set(-speed);
     motorRB.set(-speed);
@@ -51,6 +64,44 @@ public class Robot extends TimedRobot {
     return(inches/MOTOR_RATIO);
   }
 
+// AUTO FUNCTIONS //
+
+  public void incrementTask() {
+    taskIndex += 1;
+    setRightMotars(0.0);
+    setLeftMotars(0.0);
+    encoderLF.setPosition(0.0);
+    encoderRF.setPosition(0.0);
+  }
+
+  public void updateDistances() {
+    lDistance = encoderLF.getPosition();
+    rDistance = -encoderRF.getPosition();
+    aDistance = (lDistance + rDistance)/2;
+  }
+
+  public void linearMove(double distance, double speed) {
+    while (aDistance < calculateRotations(distance)) {
+      updateDistances();
+      setLeftMotars(speed);
+      setRightMotars(speed);
+    }
+  }
+
+  public void grabCube() {
+    // armGrab function
+    incrementTask();
+  }
+
+  public void dock() {
+    linearMove(-96, -0.25);
+    incrementTask();
+  }
+
+  public void breakWheels() {
+    // WHEEL BREAK CODE HERE
+    incrementTask();
+  }
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -87,6 +138,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
+    taskIndex = 0;
+
     System.out.println("Auto selected: " + m_autoSelected);
     encoderLF = motorLF.getEncoder();
     encoderRF = motorRF.getEncoder();
@@ -97,30 +150,22 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    double lDistance = encoderLF.getPosition();
-    double rDistance = -encoderRF.getPosition();
-    double aDistance = (lDistance + rDistance)/2;
-
-    double targetDistance = 100.0;
-    double testSpeed = 0.175;
+    updateDistances();
+    
     
     switch (m_autoSelected) {
       case kCustomAuto:
 
       case kDefaultAuto:
-      default:
-      
-        if (aDistance < calculateRotations(targetDistance)) {
-          setLeftMotars(testSpeed);
-          setRightMotars(testSpeed);
-        } else {
-          setRightMotars(0.0);
-          setLeftMotars(0.0);
-          System.out.println("Task halted");
-        }
-        
-        //System.out.println("left" + lDistance);
-        //System.out.println("right" + rDistance);
+      if (taskIndex == 0 ) {
+        grabCube();
+      }
+      if (taskIndex == 1) {
+        dock();
+      }
+      if (taskIndex == 2) {
+        breakWheels();
+      }
     }
   }
 
@@ -131,6 +176,13 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    if (inputDevice.getYButton()) {
+      motorM.set(TalonSRXControlMode.PercentOutput
+      , 100);
+    } else {
+      motorM.set(TalonSRXControlMode.PercentOutput, 0);
+    }
+    
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2)) ;
     double stickX = inputDevice.getRawAxis(0);
     setLeftMotars((throtle + stickX) * SPEED_MOD);
