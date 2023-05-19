@@ -10,10 +10,14 @@ import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.*;  
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 
 import java.util.concurrent.*;
 
@@ -40,8 +44,9 @@ public class Robot extends TimedRobot {
   WPI_TalonSRX motorLift = new WPI_TalonSRX(6);
   TalonSRX motorLBrake = new TalonSRX(7);
   TalonSRX motorRBrake = new TalonSRX(8);
-
-  
+  public double armState = 0;
+  // module type, foward channel, reverse channel
+  DoubleSolenoid pneumaticArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 1, 2);
   
   RelativeEncoder encoderLF; 
   RelativeEncoder encoderRF; 
@@ -252,7 +257,20 @@ public class Robot extends TimedRobot {
     }
 
     double armLiftSpeed = inputDeviceS.getRawAxis(1) * -0.5;
-    double armClampSpeed = (inputDeviceS.getRawAxis(3) - inputDeviceS.getRawAxis(2)) * 0.5;
+    //double armClampSpeed = (inputDeviceS.getRawAxis(3) - inputDeviceS.getRawAxis(2)) * 0.5;
+
+    if (inputDeviceS.getRightBumperPressed()) {
+      if (armState == 0) {
+        armState = 1;
+      } else {
+        armState = 0;
+      }
+    }
+    if (armState == 0) {
+      pneumaticArm.set(Value.kForward);
+    } else {
+      pneumaticArm.set(Value.kReverse);
+    }
     if (limitSwitch.get()) {
       armLift(armLiftSpeed);
       System.out.println("switch");
@@ -261,7 +279,7 @@ public class Robot extends TimedRobot {
       
     }
     System.out.println(armLiftSpeed);
-    armClamp(armClampSpeed);
+    //armClamp(armClampSpeed);
     
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2));
     double stickX = inputDevice.getRawAxis(0);
