@@ -7,12 +7,13 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.ctre.phoenix.motorcontrol.*;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.*;  
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import java.util.concurrent.*;
 
@@ -23,28 +24,32 @@ import java.util.concurrent.*;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static double SPEED_MOD = 1;
+  private static double SPEED_MOD = 0.5;
   private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
+  private static final String kCustomAuto = "Docing";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-
+  DigitalInput limitSwitch = new DigitalInput(0);
   private XboxController inputDevice = new XboxController(0);
   private XboxController inputDeviceS = new XboxController(1);
   CANSparkMax motorLF = new CANSparkMax (1, MotorType.kBrushless);
   CANSparkMax motorLB = new CANSparkMax (2, MotorType.kBrushless);
   CANSparkMax motorRF = new CANSparkMax (3, MotorType.kBrushless);
   CANSparkMax motorRB = new CANSparkMax (4, MotorType.kBrushless);
-  TalonSRX motorClamp = new TalonSRX(5);
-  TalonSRX motorLift = new TalonSRX(6);
+  CANSparkMax motorClamp = new CANSparkMax (5, MotorType.kBrushless);
+  WPI_TalonSRX motorLift = new WPI_TalonSRX(6);
   TalonSRX motorLBrake = new TalonSRX(7);
   TalonSRX motorRBrake = new TalonSRX(8);
 
+  
+  
   RelativeEncoder encoderLF; 
   RelativeEncoder encoderRF; 
 
   static double MOTOR_RATIO = 2.23071667;
   static double ARM_MOTOR_SPEED = 0.5;
+  static double initDistance = 136;
+  static double initDoc = 160;
 // AUTO VARS
 
   double taskIndex;
@@ -55,7 +60,7 @@ public class Robot extends TimedRobot {
 // GLOBAL FUNCTIONS
 
   public void armClamp(double speed) {
-    motorClamp.set(TalonSRXControlMode.PercentOutput, speed);
+    motorClamp.set(speed);
   }
 
   public void armLift(double speed) {
@@ -100,12 +105,57 @@ public class Robot extends TimedRobot {
       setRightMotars(speed);
     }
   }
+  public void linearMoveF(double distance, double speed) {
+    while (aDistance < calculateRotations(distance)) {
+      updateDistances();
+      setLeftMotars(speed);
+      setRightMotars(speed);
+    }
+  }
   public void dock() {
-    linearMove(-131, -0.6);
+    linearMove(-110, -0.6);
     incrementTask();
   }
+  public void coms() {
+    linearMove(-initDistance, -0.3);
+    incrementTask();
+  }
+  public void comsDoc() {
+    linearMove(-initDoc, -0.3);
+    incrementTask();
+  }
+  public void dockB() {
+    linearMoveF(86, 0.2);
+    incrementTask();
+  }
+  public void arm() {
+    double startTime = System.currentTimeMillis();
+          while( System.currentTimeMillis() < startTime + 750){
+            //System.out.println(System.currentTimeMillis());
+            motorLift.set(TalonSRXControlMode.PercentOutput, -0.8);
+          }
+          motorLift.set(TalonSRXControlMode.PercentOutput, 0);
+          startTime = System.currentTimeMillis();
+          while( System.currentTimeMillis() < startTime + 600) {
+            motorClamp.set(-0.3);
 
+          }
+          motorClamp.set(0);
+          startTime = System.currentTimeMillis();
+          while( System.currentTimeMillis() < startTime + 750){
+            //System.out.println(System.currentTimeMillis());
+            motorLift.set(0.8);
+          }
+          motorLift.set(TalonSRXControlMode.PercentOutput, 0);
+          startTime = System.currentTimeMillis();
+          while( System.currentTimeMillis() < startTime + 600) {
+            motorClamp.set(0.3);
 
+          }
+          motorClamp.set(0);
+          incrementTask();
+          
+  }
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -113,7 +163,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
+    m_chooser.addOption("Docing", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
   }
 
@@ -157,42 +207,27 @@ public class Robot extends TimedRobot {
     
     
     switch (m_autoSelected) {
-      case kCustomAuto:
       case kDefaultAuto:
       if (taskIndex == 0 ) {
         while (taskIndex == 0) {
-
-          double startTime = System.currentTimeMillis();
-          while( System.currentTimeMillis() < startTime + 750){
-            System.out.println(System.currentTimeMillis());
-            motorLift.set(TalonSRXControlMode.PercentOutput, -0.8);
-          }
-          motorLift.set(TalonSRXControlMode.PercentOutput, 0);
-          startTime = System.currentTimeMillis();
-          while( System.currentTimeMillis() < startTime + 600) {
-            motorClamp.set(TalonSRXControlMode.PercentOutput, 0.6);
-
-          }
-          motorClamp.set(TalonSRXControlMode.PercentOutput, 0);
-          startTime = System.currentTimeMillis();
-          while( System.currentTimeMillis() < startTime + 750){
-            System.out.println(System.currentTimeMillis());
-            motorLift.set(TalonSRXControlMode.PercentOutput, 0.8);
-          }
-          motorLift.set(TalonSRXControlMode.PercentOutput, 0);
-          startTime = System.currentTimeMillis();
-          while( System.currentTimeMillis() < startTime + 600) {
-            motorClamp.set(TalonSRXControlMode.PercentOutput, -0.6);
-
-          }
-          motorClamp.set(TalonSRXControlMode.PercentOutput, 0);
-          incrementTask();
+          arm();
+        }
+        if (taskIndex == 1) {
+          coms();
+          //dockB();
+        }
+        }//endline
+      case kCustomAuto:
+      if (taskIndex == 0 ) {
+        while (taskIndex == 0) {
+          arm();
 
         }
         if (taskIndex == 1) {
-          dock();
+          comsDoc();
+          dockB();
         }
-        }
+        }//endline
     }
   }
 
@@ -205,20 +240,27 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    if (inputDeviceS.getStartButtonReleased()) {
+    if (inputDeviceS.getStartButtonPressed()) {
       motorRBrake.set(TalonSRXControlMode.PercentOutput, -0.25);
 
       motorLBrake.set(TalonSRXControlMode.PercentOutput, 0.25);
     }
-    if (inputDeviceS.getBackButtonReleased()) {
+    if (inputDeviceS.getBackButtonPressed()) {
       motorRBrake.set(TalonSRXControlMode.PercentOutput, 0);
 
       motorLBrake.set(TalonSRXControlMode.PercentOutput, 0);
     }
 
-    double armLiftSpeed = inputDeviceS.getRawAxis(1) * -1;
-    double armClampSpeed = (inputDeviceS.getRawAxis(2) - inputDeviceS.getRawAxis(3)) * 0.5;
-    armLift(armLiftSpeed);
+    double armLiftSpeed = inputDeviceS.getRawAxis(1) * -0.5;
+    double armClampSpeed = (inputDeviceS.getRawAxis(3) - inputDeviceS.getRawAxis(2)) * 0.5;
+    if (limitSwitch.get()) {
+      armLift(armLiftSpeed);
+      System.out.println("switch");
+    } else if (armLiftSpeed > 0.1) {
+      armLift(armLiftSpeed);
+      
+    }
+    System.out.println(armLiftSpeed);
     armClamp(armClampSpeed);
     
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2));
@@ -235,8 +277,10 @@ public class Robot extends TimedRobot {
       motorLift.set(TalonSRXControlMode.PercentOutput, 0);
 
     }
+    
+  
 
-
+    
     //System.out.println(averageSpeed);
   }
 
