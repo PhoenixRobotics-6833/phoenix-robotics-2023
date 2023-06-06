@@ -3,23 +3,25 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
-import com.ctre.phoenix.motorcontrol.*;
-import com.ctre.phoenix.motorcontrol.can.*;  
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
-
-import java.util.concurrent.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -28,7 +30,7 @@ import java.util.concurrent.*;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static double SPEED_MOD = 0.5;
+  private static double SPEED_MOD = 1;
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "Docing";
   private String m_autoSelected;
@@ -46,7 +48,7 @@ public class Robot extends TimedRobot {
   TalonSRX motorRBrake = new TalonSRX(8);
   public double armState = 0;
   // module type, foward channel, reverse channel
-  DoubleSolenoid pneumaticArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 1, 2);
+  DoubleSolenoid pneumaticArm = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
   
   RelativeEncoder encoderLF; 
   RelativeEncoder encoderRF; 
@@ -63,6 +65,13 @@ public class Robot extends TimedRobot {
   double rDistance;
 
 // GLOBAL FUNCTIONS
+ public void pneumaticStuff() {
+   if (armState == 0) {
+      pneumaticArm.set(Value.kForward);
+    } else {
+      pneumaticArm.set(Value.kReverse);
+    }
+ }
 
   public void armClamp(double speed) {
     motorClamp.set(speed);
@@ -256,8 +265,8 @@ public class Robot extends TimedRobot {
       motorLBrake.set(TalonSRXControlMode.PercentOutput, 0);
     }
 
-    double armLiftSpeed = inputDeviceS.getRawAxis(1) * -0.5;
-    //double armClampSpeed = (inputDeviceS.getRawAxis(3) - inputDeviceS.getRawAxis(2)) * 0.5;
+    double armLiftSpeed = inputDeviceS.getRawAxis(1) * -1;
+    double armClampSpeed = (inputDeviceS.getRawAxis(3) - inputDeviceS.getRawAxis(2)) * 0.5;
 
     if (inputDeviceS.getRightBumperPressed()) {
       if (armState == 0) {
@@ -266,11 +275,8 @@ public class Robot extends TimedRobot {
         armState = 0;
       }
     }
-    if (armState == 0) {
-      pneumaticArm.set(Value.kForward);
-    } else {
-      pneumaticArm.set(Value.kReverse);
-    }
+    pneumaticStuff();
+   
     if (limitSwitch.get()) {
       armLift(armLiftSpeed);
       System.out.println("switch");
@@ -279,7 +285,7 @@ public class Robot extends TimedRobot {
       
     }
     System.out.println(armLiftSpeed);
-    //armClamp(armClampSpeed);
+    armClamp(armClampSpeed);
     
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2));
     double stickX = inputDevice.getRawAxis(0);
