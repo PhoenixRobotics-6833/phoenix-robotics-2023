@@ -57,6 +57,7 @@ public class Robot extends TimedRobot {
   static double ARM_MOTOR_SPEED = 0.5;
   static double initDistance = 136;
   static double initDoc = 160;
+  static double DEADZONE = 0.1;
 // AUTO VARS
 
   double taskIndex;
@@ -265,7 +266,12 @@ public class Robot extends TimedRobot {
       motorLBrake.set(TalonSRXControlMode.PercentOutput, 0);
     }
 
-    double armLiftSpeed = inputDeviceS.getRawAxis(1) * -1;
+    double secStickY = inputDeviceS.getRawAxis(1);
+    if (secStickY < DEADZONE & secStickY > -DEADZONE) {
+      secStickY = 0;
+    }
+    System.out.println(secStickY);
+    double armLiftSpeed =  secStickY * -1;
     double armClampSpeed = (inputDeviceS.getRawAxis(3) - inputDeviceS.getRawAxis(2)) * 0.5;
 
     if (inputDeviceS.getRightBumperPressed()) {
@@ -279,16 +285,21 @@ public class Robot extends TimedRobot {
    
     if (limitSwitch.get()) {
       armLift(armLiftSpeed);
-      System.out.println("switch");
+      //System.out.println("switch");
     } else if (armLiftSpeed > 0.1) {
       armLift(armLiftSpeed);
       
     }
-    System.out.println(armLiftSpeed);
+    //System.out.println(armLiftSpeed);
     armClamp(armClampSpeed);
     
+
     double throtle = (inputDevice.getRawAxis(3) - inputDevice.getRawAxis(2));
     double stickX = inputDevice.getRawAxis(0);
+    if (stickX < DEADZONE & stickX > -DEADZONE) {
+      stickX = 0;
+    }
+    System.out.println(stickX);
     setLeftMotars((throtle + stickX) * SPEED_MOD);
     setRightMotars((throtle - stickX) * SPEED_MOD);
    
