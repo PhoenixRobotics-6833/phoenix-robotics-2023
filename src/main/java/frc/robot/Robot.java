@@ -23,6 +23,11 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -64,6 +69,9 @@ public class Robot extends TimedRobot {
   double aDistance;
   double lDistance;
   double rDistance;
+
+  std::shared_ptr<NetworkTable> cameraTable = NetworkTable::GetTable("limelight");
+
 
 // GLOBAL FUNCTIONS
  public void pneumaticStuff() {
@@ -255,6 +263,14 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+
+
+
+
+
+
+
+
     if (inputDeviceS.getStartButtonPressed()) {
       motorRBrake.set(TalonSRXControlMode.PercentOutput, -0.25);
 
